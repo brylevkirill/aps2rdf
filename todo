@@ -1,0 +1,49 @@
+# storing possible configurations for resource (support for recursive configurations) similar to OSLC Resource Shape
+# RQL to OWL to store APS configuration resource as owl:Class resource with owl:Restriction hierarchy and with owl:hasValue constraints for links and property values defined by configuration - assigning these restrictions either to particular classes via owl:subClassOf or to particular relations via owl:Restriction
+# multiple possible owl:inverseOf relations - support by means of additional property defined as owl:inverseOf and conflicting relations defined as rdfs:subPropertyOf of this property
+# provisioning logic as rules for semantic workflow engine and workflow actions as RESTDesc definitions
+# generating workflow for operation (such as unprovisioning of resource graph) with help of reasoner by providing it with target state (such as all resources in graph being in unprovisioned state) and retrieving from it a reasoning tree with sequence of actions to accomplish target state which satisfies definition of actions and constraints in resource schemas (such as physically unprovide required resource before dependent resource) - this allows to schedule single workflow task with particular defined goals and reason sequence of necessary actions during execution of task
+
+# - upgrade of resource type schemas via rdflib.compare
+# ? owl:* constraints on classes (such as owl:allValuesFrom) instead of rdfs:domain/rdfs:range constraints on properties (the latter ones can be dropped after import of types)
+# - ugly ns* namespaces
+# - SPARQL queries combination
+# - assigning all inherited types to class and to resource (by means of generating facts by forward-chaining inference in FuXi as in ORDF sample with rdf:type and rdfs:subClassOf)
+# - checking inherited properties not being overriden
+# - "allocate": "new" ~ owl:InverseFunctionalProperty | owl:allValuesFrom + owl:Restriction + owl:inverseOf + owl:maxCardinality
+# - "collection": false (+ "required": true) ~ owl:FunctionalProperty | owl:maxCardinality (+ owl:someValuesFrom)
+# - "collection": true and "required": true ~ owl:minCardinality
+# - "required": true allowed only for one of inverse relations
+# - "type" for property
+# - "type": "enum" for property ~ owl:DataRange and owl:oneOf
+# ? "default" for type ~ ? (FuXi rule or OSLC Resource Shape)
+# ? "defaults" for relation - ? (FuXi rule or OSLC Resource Shape)
+# - "min" | "max" for property ~ owl:{all,some}ValuesFrom + owl:onDataRange [ a rdfs:Datatype; owl:onDatatype xsd:int; owl:withRestrictions ( [ xsd:minExclusive "0"^^xsd:int ] [ xsd:maxExclusive "1"^^xsd:int ] )]
+# - "required": true for property
+# - "regex" for property
+# - properties of complex value types
+# - requirement's RQL expression to OWL constraint: "owl:allValuesFrom", "and" ~ owl:intersectionOf, "or" ~ "owl:unionOf", "not" ~ owl:complementOf, "eq" ~ "value", "gt" ~ "min", "lt" ~ "max", "rel" ~ owl:Restriction
+# - APS schema instead of requirement's RQL expression (possibility to specify all properties and relations access to which is required)
+# - properties and relations - rdfs:label, rdfs:comment, rdfs:seeAlso, owl:verbAnnotations, owl:nameAnnotation, owl:nameIsLabel
+# - ontology - URI, comment, owl:versionInfo, rdfs:isDefinedBy, owl:DeprecatedClass, owl:DeprecatedProperty
+
+# * tests for import and upgrade of resource types schemas
+# * tests for provision/update/unprovision of resource/link/graph
+# * tests for validation of resource graph constraints (properties and links)
+# * tests for RQL queries
+# * tests for RQL queries over graph exported via D2RQ
+
+# - graph API (including recursive traversal) for simultaneous operations with multiple separate graphs serialized in different storages and different transactions
+# - support for mutually inverse properties by means of owl:inverseOf built-in relation
+# - support for types hierarchy by means of rdfs:subClassOf built-in relation and type validation for resource by means of transitivity inference
+# ? support for resource as instance of multiple unrelated (via inheritence) types by means of rdf:type built-in relation
+# ? support for requirement of type's relation to contain criterions for type itself as source resource in link in form of self() operator via rdfs:domain built-in relation or owl:Restriction on target resource with owl:inverseOf and owl:allValuesFrom
+# ? support for deep definition of requirements for relation using graph traversal constructs
+# ? support for declaration of complex value type or relation with enumeration of possible values (anonymous resources with embedded representations or just URIs of resources) by means of owl:oneOf
+# ? support for declaration of additional properties and relations for types defined somewhere else
+# ? support for declaration of additional constraints for property or relation of type by inherited type
+# ? support for {min,max}Items for collection of links by means of owl:{min,max}Cardinality built-in relation
+# ? support for subclassed properties by means of owl:subPropertyOf built-in relation (<person> <manager of> <organization> -> <person> <member of> <organization>)
+# ? support for transitive properties by means of owl:TransitiveProperty built-in class (<entity 1> <part of> <entity 2> + <entity 2> <part of> <entity 3> -> <entity 1> <part of> <entity 3>)
+# ? support for symmetric properties by means of owl:SymmetricProperty built-in class (<entity 1> <connected to> <entity 2> -> <entity 2> <connected to> <entity 1>)
+# ? support for automatic assigning a type to each resource which satisfies particular constraints on its properties and links by means of owl:equivalentClass built-in relation instead of rdfs:subClassOf (<x> <has access to> <y> -> <x> a <security principal>)
