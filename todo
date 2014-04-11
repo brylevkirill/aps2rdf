@@ -4,10 +4,8 @@
 # provisioning logic as rules for semantic workflow engine and workflow actions as RESTDesc definitions
 # generating workflow for operation (such as unprovisioning of resource graph) with help of reasoner by providing it with target state (such as all resources in graph being in unprovisioned state) and retrieving from it a reasoning tree with sequence of actions to accomplish target state which satisfies definition of actions and constraints in resource schemas (such as physically unprovide required resource before dependent resource) - this allows to schedule single workflow task with particular defined goals and reason sequence of necessary actions during execution of task
 
-# - upgrade of resource type schemas via rdflib.compare
+# - if type A has property P with value of type B, and type B does not have any properties with value of type A, and type C is inherited from B and has property R with value of type A, then property Q has to be automatically defined for type B as inverse one for property P and property R has to be defined as inherited from property Q
 # ? owl:* constraints on classes (such as owl:allValuesFrom) instead of rdfs:domain/rdfs:range constraints on properties (the latter ones can be dropped after import of types)
-# - ugly ns* namespaces
-# - SPARQL queries combination
 # - assigning all inherited types to class and to resource (by means of generating facts by forward-chaining inference in FuXi as in ORDF sample with rdf:type and rdfs:subClassOf)
 # - checking inherited properties not being overriden
 # - "allocate": "new" ~ owl:InverseFunctionalProperty | owl:allValuesFrom + owl:Restriction + owl:inverseOf + owl:maxCardinality
@@ -16,8 +14,8 @@
 # - "required": true allowed only for one of inverse relations
 # - "type" for property
 # - "type": "enum" for property ~ owl:DataRange and owl:oneOf
-# ? "default" for type ~ ? (FuXi rule or OSLC Resource Shape)
-# ? "defaults" for relation - ? (FuXi rule or OSLC Resource Shape)
+# - "default" property for datatype property
+# - "defaults" property for object property
 # - "min" | "max" for property ~ owl:{all,some}ValuesFrom + owl:onDataRange [ a rdfs:Datatype; owl:onDatatype xsd:int; owl:withRestrictions ( [ xsd:minExclusive "0"^^xsd:int ] [ xsd:maxExclusive "1"^^xsd:int ] )]
 # - "required": true for property
 # - "regex" for property
@@ -26,6 +24,8 @@
 # - APS schema instead of requirement's RQL expression (possibility to specify all properties and relations access to which is required)
 # - properties and relations - rdfs:label, rdfs:comment, rdfs:seeAlso, owl:verbAnnotations, owl:nameAnnotation, owl:nameIsLabel
 # - ontology - URI, comment, owl:versionInfo, rdfs:isDefinedBy, owl:DeprecatedClass, owl:DeprecatedProperty
+# - upgrade of resource type schemas via rdflib.compare
+# - combination of SPARQL queries for constraints into single query
 
 # * tests for import and upgrade of resource types schemas
 # * tests for provision/update/unprovision of resource/link/graph

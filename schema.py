@@ -6,13 +6,27 @@ from rdflib.extras.infixowl import *
 import json
 import sys
 
+def get_prefix(ns, graph):
+    (base, _, fragment) = str(ns)[:-1:].rpartition('/')
+
+    domain = ns.partition('http://')[2].partition('/')[0]
+    vendor = domain.rpartition('.')[0].partition('-')[0]
+
+    prefix = vendor + '_' + fragment
+
+    for p, n in NamespaceManager(graph).namespaces():
+        if prefix == p and str(ns) != str(n):
+            prefix = vendor + '_' + base.rpartition('/')[2] + '_' + fragment
+
+    return prefix
+
 def get_class(aps_type_id, graph, exists=None):
     (class_id, _, version) = aps_type_id.rpartition('/')
     if version and '.' not in version:
         class_id = aps_type_id
 
-    ns = Namespace(class_id + '#')
-    prefix = class_id.rpartition('/')[2]
+    ns = Namespace(class_id.rpartition('/')[0] + '/')
+    prefix = get_prefix(ns, graph)
     NamespaceManager(graph).bind(prefix, ns, override=False)
 
     cls = rdflib.URIRef(class_id)
@@ -21,14 +35,17 @@ def get_class(aps_type_id, graph, exists=None):
     else:
         cls = Class(cls, graph=graph)
 
-    return (cls, ns)
+    return cls
 
 def import_class(aps_schema, graph, validate_types=False):
-    (cls, ns) = get_class(aps_schema['id'], graph, False)
+    cls = get_class(aps_schema['id'], graph, False)
+
+    ns = Namespace(cls.identifier + '/')
+    prefix = get_prefix(ns, graph)
+    NamespaceManager(graph).bind(prefix, ns, override=False)
 
     for impl in aps_schema.get('implements', []):
-        (impl_cls, _) = get_class(
-            impl, graph, exists=validate_types or None)
+        impl_cls = get_class(impl, graph, exists=validate_types or None)
         if validate_types and not impl_cls:        
             raise Exception("type %s not imported" % impl)
 
@@ -47,8 +64,7 @@ def import_class(aps_schema, graph, validate_types=False):
             inverse_of = None
 
             for type in isinstance(type, list) and type or [type]:
-                (rel_cls, _) = get_class(
-                    type, graph, exists=validate_types or None)
+                rel_cls = get_class(type, graph, exists=validate_types or None)
                 if validate_types and not isinstance(rel_cls, Class):
                     raise Exception("type %s not imported" % type)
                 rel_cls_list.append(rel_cls)
@@ -66,7 +82,7 @@ def import_class(aps_schema, graph, validate_types=False):
                         if rev_cls is None:
                             continue
 
-                        (rev_cls, _) = get_class(rev_cls, graph)
+                        rev_cls = get_class(rev_cls, graph)
 
                         if rev_cls and isinstance(rev_cls, Class):
                             parents = [rev_cls.identifier]
